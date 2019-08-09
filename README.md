@@ -11,15 +11,12 @@ An example workflow to build, test, and publish an npm package to the default pu
 on: push
 name: Build, Test, and Publish
 jobs:
-  build:
-    name: Build
+  yarnInstall:
+    name: YarnInstall
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        version: 10.x
-    - name: Build
+    - name: YarnInstall
       uses: talves/actions-yarn@master
       with:
         args: install
@@ -27,18 +24,15 @@ jobs:
       uses: talves/actions-yarn@master
       with:
         args: test
-    - name: Master
-      uses: actions/bin/filter@master
+    - name: Build
+      uses: talves/actions-yarn@master
       with:
-        args: branch master
-    - name: Tag
-      uses: actions/bin/filter@master
-      with:
-        args: tag v*
-    - name: Publish
-      uses: actions/npm@master
+        args: build
+    - name: SemanticRelease
+      uses: talves/actions-yarn@master
       env:
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       with:
-        args: publish --access public
+        args: semantic-release
 ```
