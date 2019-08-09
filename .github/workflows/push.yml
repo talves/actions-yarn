@@ -1,0 +1,28 @@
+on: push
+name: Main
+jobs:
+  dockerLint:
+    name: Docker Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Docker Lint
+      uses: docker://replicated/dockerfilelint
+      with:
+        args: Dockerfile
+    - name: Bats Test
+      uses: actions/bin/bats@master
+      with:
+        args: test/*.bats
+    - name: Shell Lint
+      uses: actions/bin/shellcheck@master
+      with:
+        args: entrypoint.sh
+    - name: Filter Master
+      uses: actions/bin/filter@master
+      with:
+        args: branch master
+    - name: Docker Build
+      uses: actions/docker/cli@master
+      with:
+        args: build -t actions-yarn .

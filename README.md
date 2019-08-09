@@ -6,45 +6,39 @@ This Action for [yarn](https://yarnpkg.com/en/) enables arbitrary actions with t
 
 An example workflow to build, test, and publish an npm package to the default public registry follows:
 
-```hcl
-workflow "Build, Test, and Publish" {
-  on = "push"
-  resolves = ["Publish"]
-}
-
-action "Build" {
-  uses = "nuxt/actions-yarn@master"
-  args = "install"
-}
-
-action "Test" {
-  needs = "Build"
-  uses = "nuxt/actions-yarn@master"
-  args = "test"
-}
-
-# Filter for a new tag
-action "Tag" {
-  needs = "Test"
-  uses = "actions/bin/filter@master"
-  args = "tag"
-}
-
-action "Publish" {
-  needs = "Tag"
-  uses = "nuxt/actions-yarn@master"
-  args = "publish --access public"
-  secrets = ["NPM_AUTH_TOKEN"]
-}
-```
-
-## Node Versions
-
-Specify different branch name in `uses` to leverage node version.
-
-```hcl
-action "Build" {
-  uses = "nuxt/actions-yarn@node-11"
-  args = "install"
-}
+`.github/workflows/push.yml`
+```yaml
+on: push
+name: Build, Test, and Publish
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@master
+      with:
+        version: 10.x
+    - name: Build
+      uses: talves/actions-yarn@master
+      with:
+        args: install
+    - name: Test
+      uses: talves/actions-yarn@master
+      with:
+        args: test
+    - name: Master
+      uses: actions/bin/filter@master
+      with:
+        args: branch master
+    - name: Tag
+      uses: actions/bin/filter@master
+      with:
+        args: tag v*
+    - name: Publish
+      uses: actions/npm@master
+      env:
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      with:
+        args: publish --access public
 ```
