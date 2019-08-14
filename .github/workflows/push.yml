@@ -1,6 +1,24 @@
 on: push
 name: Main
 jobs:
+  batsTest:
+    name: Bats Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Bats Test
+      uses: actions/bin/bats@master
+      with:
+        args: test/*.bats
+  shellLint:
+    name: Shell Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Shell Lint
+      uses: actions/bin/shellcheck@master
+      with:
+        args: entrypoint.sh
   dockerLint:
     name: Docker Lint
     runs-on: ubuntu-latest
@@ -10,14 +28,13 @@ jobs:
       uses: docker://replicated/dockerfilelint
       with:
         args: Dockerfile
-    - name: Bats Test
-      uses: actions/bin/bats@master
-      with:
-        args: test/*.bats
-    - name: Shell Lint
-      uses: actions/bin/shellcheck@master
-      with:
-        args: entrypoint.sh
+
+  dockerBuild:
+    name: Docker Build
+    needs: [shellLint, batsTest, dockerLint]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
     - name: Filter Master
       uses: actions/bin/filter@master
       with:

@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - name: Master
+      uses: actions/bin/filter@master
+      with:
+        args: branch master
     - name: YarnInstall
       uses: talves/actions-yarn@master
       with:
@@ -31,7 +35,7 @@ jobs:
     - name: SemanticRelease
       uses: talves/actions-yarn@master
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       with:
         args: semantic-release
